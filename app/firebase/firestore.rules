@@ -1,0 +1,147 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isEditor() {
+      return isSignedIn() && 
+             (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'editor' ||
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    // PRODUCTS Collection
+    match /products/{productId} {
+      // Anyone can read published products
+      // Only admins and editors can create, update, delete
+      allow read: if resource.data.status == 'published' || isEditor();
+      allow create, update, delete: if isEditor();
+      
+      // Images subcollection
+      match /images/{imageId} {
+        // Anyone can read (public product images)
+        // Only admins and editors can create, update, delete
+        allow read: if true;
+        allow create, update, delete: if isEditor();
+      }
+      
+      // Reviews subcollection
+      match /reviews/{reviewId} {
+        // Anyone can read reviews
+        // Signed-in users can create reviews
+        // Only review owner can update own review
+        // Only admins can delete reviews
+        allow read: if true;
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+        allow delete: if isAdmin();
+      }
+      
+      // Itinerary subcollection
+      match /itinerary/{itemId} {
+        // Anyone can read itinerary
+        // Only admins and editors can create, update, delete
+        allow read: if true;
+        allow create, update, delete: if isEditor();
+      }
+      
+      // Inventory subcollection
+      match /inventory/{inventoryId} {
+        // Anyone can read inventory
+        // Only admins and editors can create, update, delete
+        allow read: if true;
+        allow create, update, delete: if isEditor();
+      }
+    }
+    
+    // USERS Collection
+    match /users/{userId} {
+      // User can read/write own profile
+      // Admins can read all profiles, update limited fields
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isOwner(userId) || 
+                     (isAdmin() && 
+                      (request.resource.data.diff(resource.data).affectedKeys()
+                       .hasOnly(['role', 'status', 'adminNotes'])));
+      allow delete: if isAdmin();
+      
+      // Favorites subcollection
+      match /favorites/{productId} {
+        // Only user can read/write own favorites
+        allow read, write: if isOwner(userId);
+      }
+      
+      // User Profile subcollection
+      match /profile/{profileId} {
+        // User can read/write own profile data
+        // Admins can read all profiles
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if isOwner(userId);
+      }
+    }
+    
+    // CARTS Collection
+    match /carts/{userId} {
+      // Only user can read/write own cart
+      allow read, write: if isOwner(userId);
+      
+      // Cart Items subcollection
+      match /items/{itemId} {
+        // Only user can read/write own cart items
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // ORDERS Collection
+    match /orders/{orderId} {
+      // User can read own orders
+      // Admins can read/write all orders
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+      
+      // Order Items subcollection
+      match /items/{itemId} {
+        // Same rules as parent order
+        allow read: if isSignedIn() && (get(/databases/$(database)/documents/orders/$(orderId)).data.userId == request.auth.uid || isAdmin());
+        allow write: if isAdmin();
+      }
+      
+      // Order History subcollection
+      match /history/{historyId} {
+        // User can read history for own orders
+        // Only admins can write history
+        allow read: if isSignedIn() && (get(/databases/$(database)/documents/orders/$(orderId)).data.userId == request.auth.uid || isAdmin());
+        allow write: if isAdmin();
+      }
+    }
+    
+    // CATEGORIES Collection
+    match /categories/{categoryId} {
+      // Anyone can read categories
+      // Only admins and editors can create, update, delete
+      allow read: if true;
+      allow write: if isEditor();
+    }
+    
+    // PROMOTIONS Collection
+    match /promotions/{promotionId} {
+      // Anyone can read active promotions
+      // Only admins can create, update, delete
+      allow read: if resource.data.isActive == true || isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+} 

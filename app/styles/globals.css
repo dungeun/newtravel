@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: var(--font-gothic-a1), system-ui, sans-serif;
+  }
+
+  body {
+    @apply text-gray-900 bg-gray-50;
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-gothic font-bold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-transparent;
+  }
+}
+
+/* 메인 배경 색상 설정 */
+:root {
+  --background-color: #5ce1e6;
+  --text-color: #333;
+}

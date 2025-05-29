@@ -1,0 +1,34 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // 모든 사용자에게 읽기 권한 부여
+    match /{allPaths=**} {
+      allow read: if true;
+    }
+    
+    // 로고 업로드 권한 - 모든 사용자에게 허용 (개발 환경용)
+    match /logos/{fileName} {
+      allow write: if true;
+    }
+    
+    // 히어로 슬라이드 이미지 업로드 권한
+    match /hero-slides/{fileName} {
+      allow write: if true;
+    }
+    
+    // 배너 이미지 업로드 권한
+    match /banners/{fileName} {
+      allow write: if true;
+    }
+    
+    // 테스트 이미지 업로드 권한
+    match /test/{fileName} {
+      allow write: if true;
+    }
+    
+    // 상품 이미지 업로드 권한
+    match /products/{fileName} {
+      allow write: if true;
+    }
+  }
+}

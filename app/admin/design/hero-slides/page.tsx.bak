@@ -1,0 +1,746 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { 
+  collection, 
+  addDoc, 
+  getDocs, 
+  doc, 
+  deleteDoc, 
+  updateDoc, 
+  query,
+  orderBy,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { db, storage } from '@/firebase/config';
+import { Button } from '@/components/ui/button';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useToast } from '@/components/ui/use-toast';
+import { AdminPageLayout } from '../../components/AdminPageLayout';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Trash2, Pencil, ArrowUp, ArrowDown, Wand2 } from 'lucide-react';
+import { fixHeroSlides } from './fix-slides';
+
+// 히어로 슬라이드 타입 정의
+interface HeroSlide {
+  id?: string;
+  imageUrl: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  buttonUrl: string;
+  order: number;
+  isActive: boolean;
+  createdAt?: any;
+}
+
+export default function HeroSlidesPage() {
+  // useTheme 훅을 사용하여 현재 테마 상태 가져오기
+  const { currentTheme } = useTheme();
+  
+  // 다크모드 여부 확인
+  const isDarkMode = currentTheme.name.toLowerCase().includes('dark') || 
+                    currentTheme.name.toLowerCase().includes('다크');
+  const router = useRouter();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
+  const [newSlide, setNewSlide] = useState<HeroSlide>({
+    imageUrl: '',
+    title: '',
+    description: '',
+    buttonText: '자세히 보기',
+    buttonUrl: '',
+    order: 0,
+    isActive: true
+  });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [editMode, setEditMode] = useState(false);
+  const [editSlideId, setEditSlideId] = useState<string | null>(null);
+
+  // 슬라이드 목록 불러오기
+  const fetchHeroSlides = async () => {
+    try {
+      setLoading(true);
+      const slidesCollection = collection(db, 'heroSlides');
+      const slidesQuery = query(slidesCollection, orderBy('order', 'asc'));
+      const slidesSnapshot = await getDocs(slidesQuery);
+      const slidesList = slidesSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as HeroSlide[];
+      
+      setHeroSlides(slidesList);
+    } catch (error) {
+      console.error('슬라이드 목록을 불러오는데 실패했습니다:', error);
+      toast({
+        title: '오류',
+        description: '슬라이드 목록을 불러오는데 실패했습니다.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    fetchHeroSlides();
+  }, []);
+
+  // 파일 선택 핸들러
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // 파일 크기 체크 (5MB 제한)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: '파일 크기 초과',
+          description: '파일 크기가 5MB를 초과할 수 없습니다.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      setSelectedFile(file);
+      
+      // 미리보기 URL 생성
+      const fileReader = new FileReader();
+      fileReader.onload = (e) => {
+        const result = e.target?.result as string;
+        setPreviewUrl(result);
+      };
+      fileReader.readAsDataURL(file);
+    }
+  };
+
+  // 새 슬라이드 추가 또는 기존 슬라이드 수정
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newSlide.title) {
+      toast({
+        title: '유효성 검사 실패',
+        description: '슬라이드 제목은 필수 항목입니다.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // 최대 3개 슬라이드 제한
+    if (heroSlides.length >= 3 && !editMode) {
+      toast({
+        title: '슬라이드 제한',
+        description: '최대 3개의 슬라이드만 추가할 수 있습니다.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      let imageUrl = newSlide.imageUrl;
+      
+      // 새 이미지 파일이 선택된 경우 Storage에 업로드
+      if (selectedFile) {
+        // 파일 형식 확인
+        if (!selectedFile.type.startsWith('image/')) {
+          console.error('지원되지 않는 파일 형식:', selectedFile.type);
+          toast({
+            title: '지원되지 않는 파일 형식',
+            description: '이미지 파일만 업로드 가능합니다.',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
+        
+        // 파일 사이즈 확인 (10MB 이하)
+        if (selectedFile.size > 10 * 1024 * 1024) {
+          console.error('파일 사이즈 초과:', selectedFile.size);
+          toast({
+            title: '파일 크기 초과',
+            description: '파일 크기는 10MB 이하여야 합니다.',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
+        
+        try {
+          console.log('히어로 슬라이드 이미지 업로드 시작:', {
+            fileName: selectedFile.name,
+            fileType: selectedFile.type,
+            fileSize: selectedFile.size
+          });
+          
+          // 수정 모드에서 기존 이미지 삭제
+          if (editMode && newSlide.imageUrl) {
+            try {
+              console.log('기존 이미지 삭제 시도:', newSlide.imageUrl);
+              // URL에서 전체 경로 추출
+              const pathStart = newSlide.imageUrl.indexOf('hero-slides/');
+              if (pathStart !== -1) {
+                const imagePath = newSlide.imageUrl.substring(pathStart);
+                const oldImageRef = ref(storage, imagePath);
+                await deleteObject(oldImageRef);
+                console.log('기존 이미지 삭제 성공:', imagePath);
+              } else {
+                console.log('기존 이미지 경로를 찾을 수 없습니다:', newSlide.imageUrl);
+              }
+            } catch (error) {
+              console.error('기존 이미지 삭제 실패:', error);
+              // 오류가 발생해도 계속 진행
+            }
+          }
+          
+          // Firebase Storage 및 환경변수 확인
+          if (!process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET) {
+            console.error('Firebase Storage 버킷 환경변수가 설정되지 않았습니다.');
+            toast({
+              title: 'Firebase 설정 오류',
+              description: 'Firebase 설정에 문제가 있습니다. 관리자에게 문의하세요.',
+              variant: 'destructive',
+            });
+            setLoading(false);
+            return;
+          }
+          
+          // 새 이미지 업로드
+          const fileName = `hero-slides/${Date.now()}_${selectedFile.name}`;
+          console.log('이미지 업로드 경로:', fileName);
+          const storageRef = ref(storage, fileName);
+          
+          const uploadResult = await uploadBytes(storageRef, selectedFile);
+          console.log('이미지 업로드 완료:', uploadResult);
+          
+          imageUrl = await getDownloadURL(storageRef);
+          console.log('이미지 URL 가져오기 완료:', imageUrl);
+        } catch (error) {
+          const uploadError = error as Error;
+          console.error('이미지 업로드 실패 상세:', uploadError);
+          toast({
+            title: '이미지 업로드 실패',
+            description: `오류: ${uploadError.message || '알 수 없는 오류가 발생했습니다.'}`,
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
+      }
+      
+      // 슬라이드 순서 설정
+      let order = newSlide.order;
+      if (!editMode) {
+        // 새 슬라이드는 마지막에 추가
+        order = heroSlides.length;
+      }
+      
+      // 슬라이드 데이터 준비
+      const slideData = {
+        imageUrl,
+        title: newSlide.title,
+        description: newSlide.description,
+        buttonText: newSlide.buttonText || '자세히 보기',
+        buttonUrl: newSlide.buttonUrl || '#',
+        order,
+        isActive: newSlide.isActive,
+        createdAt: serverTimestamp(),
+      };
+      
+      if (editMode && editSlideId) {
+        // 기존 슬라이드 수정
+        const slideRef = doc(db, 'heroSlides', editSlideId);
+        await updateDoc(slideRef, slideData);
+        toast({
+          title: '성공',
+          description: '슬라이드가 성공적으로 수정되었습니다.',
+        });
+      } else {
+        // 새 슬라이드 추가
+        await addDoc(collection(db, 'heroSlides'), slideData);
+        toast({
+          title: '성공',
+          description: '새 슬라이드가 성공적으로 추가되었습니다.',
+        });
+      }
+      
+      // 폼 초기화
+      setNewSlide({
+        imageUrl: '',
+        title: '',
+        description: '',
+        buttonText: '자세히 보기',
+        buttonUrl: '',
+        order: 0,
+        isActive: true
+      });
+      setSelectedFile(null);
+      setPreviewUrl('');
+      setEditMode(false);
+      setEditSlideId(null);
+      
+      // 슬라이드 목록 다시 불러오기
+      fetchHeroSlides();
+    } catch (error) {
+      console.error('슬라이드 저장 중 오류 발생:', error);
+      toast({
+        title: '오류',
+        description: '슬라이드를 저장하는 중 오류가 발생했습니다.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 슬라이드 삭제
+  const deleteSlide = async (id: string, imageUrl: string) => {
+    if (window.confirm('정말로 이 슬라이드를 삭제하시겠습니까?')) {
+      try {
+        setLoading(true);
+        
+        // Firestore에서 슬라이드 문서 삭제
+        await deleteDoc(doc(db, 'heroSlides', id));
+        
+        // Storage에서 이미지 삭제
+        if (imageUrl) {
+          try {
+            const imageRef = ref(storage, imageUrl);
+            await deleteObject(imageRef);
+          } catch (imageError) {
+            console.error('이미지 삭제 실패:', imageError);
+          }
+        }
+        
+        toast({
+          title: '성공',
+          description: '슬라이드가 성공적으로 삭제되었습니다.',
+        });
+        
+        // 슬라이드 목록 갱신 및 순서 재조정
+        const updatedSlides = heroSlides.filter(slide => slide.id !== id);
+        
+        // 순서 재조정
+        for (let i = 0; i < updatedSlides.length; i++) {
+          const slide = updatedSlides[i];
+          if (slide.order !== i) {
+            await updateDoc(doc(db, 'heroSlides', slide.id!), {
+              order: i
+            });
+          }
+        }
+        
+        // 슬라이드 목록 다시 불러오기
+        fetchHeroSlides();
+      } catch (error) {
+        console.error('슬라이드 삭제 중 오류 발생:', error);
+        toast({
+          title: '오류',
+          description: '슬라이드를 삭제하는 중 오류가 발생했습니다.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  // 슬라이드 활성화 상태 토글
+  const toggleSlideStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      setLoading(true);
+      const slideRef = doc(db, 'heroSlides', id);
+      await updateDoc(slideRef, {
+        isActive: !currentStatus
+      });
+      
+      toast({
+        title: '성공',
+        description: `슬라이드가 ${!currentStatus ? '활성화' : '비활성화'} 되었습니다.`,
+      });
+      
+      // 슬라이드 목록 갱신
+      fetchHeroSlides();
+    } catch (error) {
+      console.error('슬라이드 상태 변경 중 오류 발생:', error);
+      toast({
+        title: '오류',
+        description: '슬라이드 상태를 변경하는 중 오류가 발생했습니다.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 슬라이드 순서 변경 (위로)
+  const moveSlideUp = async (id: string, currentOrder: number) => {
+    if (currentOrder <= 0) return;
+    
+    try {
+      setLoading(true);
+      
+      // 현재 슬라이드의 이전 순서 찾기
+      const slideToSwap = heroSlides.find(slide => slide.order === currentOrder - 1);
+      if (!slideToSwap || !slideToSwap.id) return;
+      
+      // 순서 변경
+      await updateDoc(doc(db, 'heroSlides', id), {
+        order: currentOrder - 1
+      });
+      
+      await updateDoc(doc(db, 'heroSlides', slideToSwap.id), {
+        order: currentOrder
+      });
+      
+      // 슬라이드 목록 갱신
+      fetchHeroSlides();
+    } catch (error) {
+      console.error('슬라이드 순서 변경 중 오류 발생:', error);
+      toast({
+        title: '오류',
+        description: '슬라이드 순서를 변경하는 중 오류가 발생했습니다.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 슬라이드 순서 변경 (아래로)
+  const moveSlideDown = async (id: string, currentOrder: number) => {
+    if (currentOrder >= heroSlides.length - 1) return;
+    
+    try {
+      setLoading(true);
+      
+      // 현재 슬라이드의 다음 순서 찾기
+      const slideToSwap = heroSlides.find(slide => slide.order === currentOrder + 1);
+      if (!slideToSwap || !slideToSwap.id) return;
+      
+      // 순서 변경
+      await updateDoc(doc(db, 'heroSlides', id), {
+        order: currentOrder + 1
+      });
+      
+      await updateDoc(doc(db, 'heroSlides', slideToSwap.id), {
+        order: currentOrder
+      });
+      
+      // 슬라이드 목록 갱신
+      fetchHeroSlides();
+    } catch (error) {
+      console.error('슬라이드 순서 변경 중 오류 발생:', error);
+      toast({
+        title: '오류',
+        description: '슬라이드 순서를 변경하는 중 오류가 발생했습니다.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 슬라이드 편집 모드 설정
+  const editSlide = (slide: HeroSlide) => {
+    setNewSlide({
+      imageUrl: slide.imageUrl,
+      title: slide.title,
+      description: slide.description,
+      buttonText: slide.buttonText,
+      buttonUrl: slide.buttonUrl,
+      order: slide.order,
+      isActive: slide.isActive,
+    });
+    setPreviewUrl(slide.imageUrl);
+    setEditMode(true);
+    setEditSlideId(slide.id || null);
+  };
+
+  // 편집 취소
+  const cancelEdit = () => {
+    setNewSlide({
+      imageUrl: '',
+      title: '',
+      description: '',
+      buttonText: '자세히 보기',
+      buttonUrl: '',
+      order: 0,
+      isActive: true
+    });
+    setSelectedFile(null);
+    setPreviewUrl('');
+    setEditMode(false);
+    setEditSlideId(null);
+  };
+
+  // 슬라이드 문제 진단
+  const diagnoseSlides = () => {
+    // 오류 메시지 저장 배열
+    const issues: string[] = [];
+    
+    // 1. 활성화된 슬라이드 확인
+    const activeSlides = heroSlides.filter(slide => slide.isActive);
+    if (activeSlides.length === 0) {
+      issues.push("활성화된 슬라이드가 없습니다. 하나 이상의 슬라이드를 활성화해주세요.");
+    }
+    
+    // 2. 이미지 URL 확인
+    for (const slide of heroSlides) {
+      if (!slide.imageUrl) {
+        issues.push(`'${slide.title}' 슬라이드에 이미지가 없습니다.`);
+      }
+      
+      // 잘못된 이미지 URL 형식
+      if (slide.imageUrl && !slide.imageUrl.startsWith('http')) {
+        issues.push(`'${slide.title}' 슬라이드의 이미지 URL이 올바르지 않습니다.`);
+      }
+    }
+    
+    // 3. 순서 확인 - 순서 중복이나 빠진 번호 확인
+    const orders = heroSlides.map(slide => slide.order).sort((a, b) => a - b);
+    for (let i = 0; i < orders.length; i++) {
+      if (i !== orders[i]) {
+        issues.push(`슬라이드 순서에 문제가 있습니다. 순서가 0부터 시작하여 연속적이어야 합니다.`);
+        break;
+      }
+    }
+    
+    // 4. 슬라이드 수 확인
+    if (heroSlides.length > 3) {
+      issues.push(`슬라이드가 ${heroSlides.length}개로 너무 많습니다. 최대 3개를 권장합니다.`);
+    }
+    
+    // 결과 반환
+    if (issues.length === 0) {
+      toast({
+        title: '진단 완료',
+        description: '슬라이드에 문제가 없습니다.',
+      });
+    } else {
+      toast({
+        title: `슬라이드 문제 발견 (${issues.length}개)`,
+        description: issues[0],
+        variant: 'destructive',
+      });
+      console.error('슬라이드 문제 목록:', issues);
+      
+      // 전체 슬라이드 상태 디버깅
+      console.log('현재 슬라이드 상태:', heroSlides);
+    }
+  };
+
+  // 모든 슬라이드를 재정렬 (순서 재설정)
+  const reorderAllSlides = async () => {
+    if (heroSlides.length === 0) {
+      toast({
+        title: '오류',
+        description: '재정렬할 슬라이드가 없습니다.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // 현재 순서대로 정렬
+      const sortedSlides = [...heroSlides].sort((a, b) => a.order - b.order);
+      
+      // 순서 재설정 (0부터 시작)
+      for (let i = 0; i < sortedSlides.length; i++) {
+        const slide = sortedSlides[i];
+        if (slide.id && slide.order !== i) {
+          await updateDoc(doc(db, 'heroSlides', slide.id), { order: i });
+        }
+      }
+      
+      toast({
+        title: '성공',
+        description: '모든 슬라이드의 순서가 재설정되었습니다.',
+      });
+      
+      // 슬라이드 목록 다시 불러오기
+      fetchHeroSlides();
+    } catch (error) {
+      console.error('슬라이드 재정렬 중 오류 발생:', error);
+      toast({
+        title: '오류',
+        description: '슬라이드 재정렬 중 오류가 발생했습니다.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 모든 슬라이드 자동 수정
+  const autoFixAllSlides = async () => {
+    if (window.confirm('모든 슬라이드를 자동으로 수정하시겠습니까? 이 작업은 모든 슬라이드를 활성화하고 순서를 재설정합니다.')) {
+      try {
+        setLoading(true);
+        
+        const result = await fixHeroSlides();
+        
+        if (result.success) {
+          toast({
+            title: '수정 완료',
+            description: result.message,
+          });
+        } else {
+          toast({
+            title: '오류',
+            description: result.message,
+            variant: 'destructive',
+          });
+        }
+        
+        // 슬라이드 목록 다시 불러오기
+        fetchHeroSlides();
+      } catch (error) {
+        console.error('슬라이드 자동 수정 중 오류 발생:', error);
+        toast({
+          title: '오류',
+          description: '슬라이드 자동 수정 중 오류가 발생했습니다.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+                        <img
+                          src={slide.imageUrl}
+                          alt={slide.title}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div className="md:w-2/3">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="text-base">{slide.title}</CardTitle>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={slide.isActive}
+                            onCheckedChange={() => toggleSlideStatus(slide.id!, slide.isActive)}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            {slide.isActive ? '활성화' : '비활성화'}
+                          </span>
+                        </div>
+                      </div>
+                      <CardDescription className="line-clamp-2">
+                        {slide.description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">버튼 텍스트:</span> {slide.buttonText}
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">링크:</span> {slide.buttonUrl}
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => moveSlideUp(slide.id!, slide.order)}
+                          disabled={slide.order === 0}
+                        >
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => moveSlideDown(slide.id!, slide.order)}
+                          disabled={slide.order === heroSlides.length - 1}
+                        >
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => editSlide(slide)}
+                        >
+                          <Pencil className="h-4 w-4 mr-1" /> 편집
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => deleteSlide(slide.id!, slide.imageUrl)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" /> 삭제
+                        </Button>
+                      </div>
+                    </CardFooter>
+                      onChange={(e) => setNewSlide({ ...newSlide, buttonText: e.target.value })}
+                      placeholder="자세히 보기"
+                    />
+                  </div>
+                  
+                  <div className="grid w-full items-center gap-2">
+                    <Label htmlFor="buttonUrl">버튼 링크</Label>
+                    <Input
+                      id="buttonUrl"
+                      type="text"
+                      value={newSlide.buttonUrl}
+                      onChange={(e) => setNewSlide({ ...newSlide, buttonUrl: e.target.value })}
+                      placeholder="https://"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="isActive"
+                    checked={newSlide.isActive}
+                    onCheckedChange={(checked: boolean) => setNewSlide({ ...newSlide, isActive: checked })}
+                  />
+                  <Label htmlFor="isActive">활성화</Label>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={cancelEdit}
+                >
+                  취소
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={loading || (!editMode && (heroSlides.length >= 3))}
+                >
+                  {loading ? '처리 중...' : editMode ? '슬라이드 수정' : '슬라이드 추가'}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </AdminPageLayout>
+  );
+}

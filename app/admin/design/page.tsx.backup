@@ -1,0 +1,716 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+// import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/components/ui/use-toast';
+import { AdminPageLayout, AdminSection } from '../components/AdminPageLayout';
+// import dynamic from 'next/dynamic';
+import { collection, doc, getDoc, updateDoc, setDoc, getDocs, query, orderBy } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '@/firebase/config';
+import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import DraggableSectionList from './DraggableSectionList';
+
+import { CheckCircle } from 'lucide-react/dist/esm/icons/check-circle';
+import { AlertTriangle } from 'lucide-react/dist/esm/icons/alert-triangle';
+import { Save } from 'lucide-react/dist/esm/icons/save';
+import { RefreshCw } from 'lucide-react/dist/esm/icons/refresh-cw';
+import { Sun } from 'lucide-react/dist/esm/icons/sun';
+import { Moon } from 'lucide-react/dist/esm/icons/moon';
+import { MoveVertical } from 'lucide-react/dist/esm/icons/move-vertical';
+import { Upload } from 'lucide-react/dist/esm/icons/upload';
+import { Image as ImageIcon } from 'lucide-react/dist/esm/icons/image';
+import { FileEdit } from 'lucide-react/dist/esm/icons/file-edit';
+
+// 사용하지 않는 아이콘 주석 처리
+// import { Eye } from 'lucide-react/dist/esm/icons/eye';
+// import { EyeOff } from 'lucide-react/dist/esm/icons/eye-off';
+// import { ArrowUp } from 'lucide-react/dist/esm/icons/arrow-up';
+// import { ArrowDown } from 'lucide-react/dist/esm/icons/arrow-down';
+
+interface MainPageSection {
+  id: string;
+  type: string;
+  title: string;
+  isFixed: boolean;
+  isVisible: boolean;
+  order: number;
+}
+
+interface HeroSlide {
+  id?: string;
+  imageUrl: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  buttonUrl: string;
+  order: number;
+  isActive: boolean;
+}
+
+interface Logo {
+  id?: string;
+  imageUrl: string;
+  altText: string;
+  linkUrl: string;
+  darkModeImageUrl?: string;
+}
+
+interface TemplateSettings {
+  theme: string;
+  group1: {
+    block1: string;
+    block2: string;
+    banner: string;
+  };
+  group2: {
+    block1: string;
+    block2: string;
+    banner: string;
+  };
+}
+
+type AlertType = { message: string; type: 'success' | 'error' } | null;
+
+export default function DesignManagementPage() {
+  const { currentTheme, setTheme } = useTheme();
+  const { toast } = useToast();
+  
+  // 다크모드 여부 확인
+  const isDarkMode = currentTheme.name.toLowerCase().includes('dark') || 
+                    currentTheme.name.toLowerCase().includes('다크');
+  const [previewTheme, setPreviewTheme] = useState<string>(currentTheme.name);
+  const [mainPageSections, setMainPageSections] = useState<MainPageSection[]>([]);
+  const [alert, setAlert] = useState<AlertType>(null);
+  const [templateSettings, setTemplateSettings] = useState<TemplateSettings>({
+    theme: 'light',
+    group1: { block1: '', block2: '', banner: '' },
+    group2: { block1: '', block2: '', banner: '' }
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
+  const [logo, setLogo] = useState<Logo | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [darkLogoFile, setDarkLogoFile] = useState<File | null>(null);
+  const router = useRouter();
+
+  // 기본 섹션 정의
+  const getDefaultSections = (): MainPageSection[] => [
+    { id: 'header', type: 'HEADER', title: '헤더 네비게이션', isFixed: true, isVisible: true, order: 0 },
+    { id: 'hero', type: 'HERO', title: '히어로 섹션', isFixed: true, isVisible: true, order: 1 },
+    { id: 'search', type: 'SEARCH', title: '검색 섹션', isFixed: true, isVisible: true, order: 2 },
+    { id: 'banner', type: 'BANNER', title: '메인 배너', isFixed: false, isVisible: true, order: 3 },
+    { id: 'regionalTravel', type: 'REGIONAL_TRAVEL', title: '지역별 여행', isFixed: false, isVisible: true, order: 4 },
+    { id: 'timeDeal', type: 'TIME_DEAL', title: '타임딜', isFixed: false, isVisible: true, order: 5 },
+    { id: 'themeTravel', type: 'THEME_TRAVEL', title: '테마별 여행', isFixed: false, isVisible: true, order: 6 },
+    { id: 'promotion', type: 'PROMOTION', title: '특가 프로모션', isFixed: false, isVisible: true, order: 7 },
+    { id: 'review', type: 'REVIEW', title: '여행 후기', isFixed: false, isVisible: true, order: 8 },
+    { id: 'footer', type: 'FOOTER', title: '푸터', isFixed: true, isVisible: true, order: 9 },
+  ];
+  
+  // 알림 표시 - toast와 함께 사용
+  const showAlert = (message: string, type: 'success' | 'error') => {
+    // Toast 표시
+    toast({
+      title: type === 'success' ? '성공' : '오류',
+      description: message,
+      variant: type === 'success' ? 'default' : 'destructive',
+    });
+    
+    // 기존 알림 상태 업데이트 (호환성 유지)
+    setAlert({ message, type });
+    setTimeout(() => setAlert(null), 5000); // 5초 후 알림 사라짐
+  };
+  
+  // 메인페이지 섹션 로드
+  const loadMainPageSections = () => {
+    try {
+      const savedSections = localStorage.getItem('mainPageSections');
+      if (savedSections) {
+        setMainPageSections(JSON.parse(savedSections));
+      } else {
+        const defaultSections = getDefaultSections();
+        setMainPageSections(defaultSections);
+        localStorage.setItem('mainPageSections', JSON.stringify(defaultSections));
+      }
+    } catch (error) {
+      console.error('섹션 설정을 불러오는데 실패했습니다:', error);
+      // 오류 발생 시 기본값으로 설정
+      const defaultSections = getDefaultSections();
+      setMainPageSections(defaultSections);
+      localStorage.setItem('mainPageSections', JSON.stringify(defaultSections));
+    }
+  };
+  
+  // 히어로 섹션 슬라이드 로드
+  const loadHeroSlides = async () => {
+    try {
+      const slidesRef = collection(db, 'heroSlides');
+      const q = query(slidesRef, orderBy('order', 'asc'));
+      const querySnapshot = await getDocs(q);
+      
+      const slides: HeroSlide[] = [];
+      querySnapshot.forEach((doc) => {
+        slides.push({
+          id: doc.id,
+          ...doc.data() as HeroSlide
+        });
+      });
+      
+      setHeroSlides(slides);
+    } catch (error) {
+      console.error('히어로 슬라이드를 불러오는데 실패했습니다:', error);
+      showAlert('히어로 슬라이드를 불러오는데 실패했습니다.', 'error');
+    }
+  };
+  
+  // 로고 정보 로드
+  const loadLogo = async () => {
+    try {
+      const logoDoc = await getDoc(doc(db, 'settings', 'logo'));
+      if (logoDoc.exists()) {
+        setLogo(logoDoc.data() as Logo);
+      }
+    } catch (error) {
+      console.error('로고 정보를 불러오는데 실패했습니다:', error);
+      showAlert('로고 정보를 불러오는데 실패했습니다.', 'error');
+    }
+  };
+  
+  // 메인페이지 섹션 저장
+  const saveMainPageSections = () => {
+    try {
+      localStorage.setItem('mainPageSections', JSON.stringify(mainPageSections));
+      showAlert('섹션 설정이 저장되었습니다.', 'success');
+    } catch (error) {
+      console.error('섹션 설정 저장 중 오류 발생:', error);
+      showAlert('섹션 설정 저장 중 오류가 발생했습니다.', 'error');
+    }
+  };
+  
+  // 로고 파일 업로드 처리
+  const handleLogoUpload = async () => {
+    if (!logoFile) {
+      showAlert('업로드할 로고 파일을 선택해주세요.', 'error');
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      // Firebase Storage 및 환경변수 확인
+      if (!process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET) {
+        console.error('Firebase Storage 버킷 환경변수가 설정되지 않았습니다.');
+        showAlert('Firebase 설정에 문제가 있습니다. 관리자에게 문의하세요.', 'error');
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('Firebase 환경변수 확인:', {
+        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '미설정',
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '미설정'
+      });
+      
+      // 로고 이미지 저장 경로
+      console.log('로고 파일 정보:', {
+        name: logoFile.name,
+        size: logoFile.size,
+        type: logoFile.type
+      });
+      
+      const logoRef = ref(storage, `logos/main-${Date.now()}`);
+      console.log('로고 참조 생성 완료:', logoRef);
+      
+      // 파일 업로드 - 파일 형식 확인 추가
+      if (!logoFile.type.startsWith('image/')) {
+        console.error('지원되지 않는 파일 형식:', logoFile.type);
+        showAlert('이미지 파일만 업로드 가능합니다.', 'error');
+        setIsLoading(false);
+        return;
+      }
+      
+      // 파일 사이즈 확인 (5MB 이하)
+      if (logoFile.size > 5 * 1024 * 1024) {
+        console.error('파일 사이즈 초과:', logoFile.size);
+        showAlert('파일 크기는 5MB 이하여야 합니다.', 'error');
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        // 업로드 전 로그 추가
+        console.log('로고 업로드 시도:', {
+          fileName: logoFile.name,
+          fileType: logoFile.type,
+          fileSize: logoFile.size,
+          storagePath: `logos/main-${Date.now()}`
+        });
+        
+        const uploadResult = await uploadBytes(logoRef, logoFile);
+        console.log('로고 업로드 완료:', uploadResult);
+      } catch (error) {
+        const uploadError = error as Error;
+        console.error('로고 업로드 실패 상세:', uploadError);
+        showAlert(`로고 업로드 실패: ${uploadError.message || '알 수 없는 오류'}`, 'error');
+        setIsLoading(false);
+        return;
+      }
+      
+      // 다운로드 URL 가져오기
+      const logoUrl = await getDownloadURL(logoRef);
+      console.log('로고 URL 가져오기 완료:', logoUrl);
+      
+      // 다크모드 로고 처리
+      let darkLogoUrl = '';
+      if (darkLogoFile) {
+        // 파일 형식 확인
+        if (!darkLogoFile.type.startsWith('image/')) {
+          console.error('지원되지 않는 다크모드 로고 파일 형식:', darkLogoFile.type);
+          showAlert('다크모드 로고는 이미지 파일만 업로드 가능합니다.', 'error');
+          // 다크모드 로고 업로드는 선택사항이므로 중단하지 않고 계속 진행
+        } else {
+          // 파일 사이즈 확인 (5MB 이하)
+          if (darkLogoFile.size > 5 * 1024 * 1024) {
+            console.error('다크모드 로고 파일 사이즈 초과:', darkLogoFile.size);
+            showAlert('다크모드 로고 파일 크기는 5MB 이하여야 합니다.', 'error');
+            // 다크모드 로고 업로드는 선택사항이므로 중단하지 않고 계속 진행
+          } else {
+            try {
+              console.log('다크모드 로고 업로드 시작:', {
+                fileName: darkLogoFile.name,
+                fileType: darkLogoFile.type,
+                fileSize: darkLogoFile.size
+              });
+              const darkLogoRef = ref(storage, `logos/dark-${Date.now()}`);
+              await uploadBytes(darkLogoRef, darkLogoFile);
+              darkLogoUrl = await getDownloadURL(darkLogoRef);
+              console.log('다크모드 로고 업로드 완료:', darkLogoUrl);
+            } catch (error) {
+              const uploadError = error as Error;
+              console.error('다크모드 로고 업로드 실패:', uploadError);
+              showAlert(`다크모드 로고 업로드 실패: ${uploadError.message || '알 수 없는 오류'}`, 'error');
+              // 다크모드 로고 업로드는 선택사항이므로 중단하지 않고 계속 진행
+            }
+          }
+        }
+      }
+      
+      // 로고 데이터 업데이트
+      const updatedLogo = {
+        imageUrl: logoUrl,
+        darkModeImageUrl: darkLogoUrl || (logo?.darkModeImageUrl || ''),
+        altText: logo?.altText || '웹사이트 로고',
+        linkUrl: logo?.linkUrl || '/'
+      };
+      
+      // Firestore에 저장
+      await setDoc(doc(db, 'settings', 'logo'), updatedLogo);
+      
+      setLogo(updatedLogo);
+      setLogoFile(null);
+      setDarkLogoFile(null);
+      
+      showAlert('로고가 성공적으로 업로드되었습니다.', 'success');
+    } catch (error) {
+      console.error('로고 업로드 중 오류 발생:', error);
+      showAlert('로고 업로드 중 오류가 발생했습니다.', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // 템플릿 설정 가져오기
+  const fetchTemplateSettings = async () => {
+    try {
+      const templateRef = doc(collection(db, 'settings'), 'template');
+      const templateDoc = await getDoc(templateRef);
+      
+      if (templateDoc.exists()) {
+        setTemplateSettings(templateDoc.data() as TemplateSettings);
+      }
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.error('템플릿 설정을 가져오는데 실패했습니다:', error);
+      setIsLoading(false);
+    }
+  };
+  
+  // 로고 파일 선택 핸들러
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setLogoFile(e.target.files[0]);
+    }
+  };
+  
+  // 다크모드 로고 파일 선택 핸들러
+  const handleDarkLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setDarkLogoFile(e.target.files[0]);
+    }
+  };
+  
+  // 섹션 순서 변경 처리 함수
+  const handleSectionReorder = (sourceIndex: number, destinationIndex: number) => {
+    const updatedSections = [...mainPageSections];
+    
+    // 이동할 항목 가져오기
+    const [movedItem] = updatedSections.splice(sourceIndex, 1);
+    
+    // 새 위치에 삽입
+    updatedSections.splice(destinationIndex, 0, movedItem);
+    
+    // order 속성 업데이트
+    const reorderedSections = updatedSections.map((section, index) => ({
+      ...section,
+      order: index
+    }));
+    
+    setMainPageSections(reorderedSections);
+  };
+  
+  // 섹션 가시성 토글
+  const toggleSectionVisibility = (sectionId: string) => {
+    const updatedSections = mainPageSections.map((section) => {
+      if (section.id === sectionId) {
+        return { ...section, isVisible: !section.isVisible };
+      }
+      return section;
+    });
+    
+    setMainPageSections(updatedSections);
+  };
+  
+  // 섹션 초기화
+  const resetSections = () => {
+    if (window.confirm('모든 섹션을 기본 설정으로 초기화하시겠습니까?')) {
+      const defaultSections = getDefaultSections();
+      setMainPageSections(defaultSections);
+      localStorage.setItem('mainPageSections', JSON.stringify(defaultSections));
+      showAlert('섹션이 기본 설정으로 초기화되었습니다.', 'success');
+    }
+  };
+  
+  // 테마 변경
+  const handleThemeChange = (themeName: string) => {
+    try {
+      // 테마 객체 생성
+      const newTheme = {
+        ...currentTheme,
+        name: themeName
+      };
+      
+      setTheme(newTheme);
+      setPreviewTheme(themeName);
+      showAlert(`테마가 ${themeName === 'dark' ? '다크' : '라이트'} 모드로 변경되었습니다.`, 'success');
+    } catch (error) {
+      console.error('테마 변경 중 오류 발생:', error);
+      showAlert('테마 변경 중 오류가 발생했습니다.', 'error');
+    }
+  };
+  
+  // 설정 저장
+  const handleSave = async () => {
+    try {
+      // 테마 설정 적용
+      setTheme({ ...currentTheme, name: previewTheme });
+      
+      // Firestore에 저장
+      const templateRef = doc(collection(db, 'settings'), 'template');
+      
+      try {
+        await updateDoc(templateRef, {
+          ...templateSettings,
+          theme: previewTheme
+        });
+      } catch (error: any) {
+        if (error.name === 'FirebaseError') {
+          // 문서가 없으면 새로 생성
+          await setDoc(templateRef, {
+            ...templateSettings,
+            theme: previewTheme
+          });
+        } else {
+          throw error;
+        }
+      }
+      
+      showAlert('설정이 저장되었습니다.', 'success');
+    } catch (error) {
+      console.error('설정 저장 중 오류 발생:', error);
+      showAlert('설정 저장 중 오류가 발생했습니다.', 'error');
+    }
+  };
+  
+  // 초기 로드
+  useEffect(() => {
+    loadMainPageSections();
+    fetchTemplateSettings();
+    loadHeroSlides();
+    loadLogo();
+  }, []);
+
+  // themeActions 정의
+  const themeActions = (
+    <div className="flex space-x-2">
+      <Button
+        variant={previewTheme === 'light' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => handleThemeChange('light')}
+      >
+        <Sun className="h-4 w-4 mr-2" />
+        라이트 모드
+      </Button>
+      <Button
+        variant={previewTheme === 'dark' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => handleThemeChange('dark')}
+      >
+        <Moon className="h-4 w-4 mr-2" />
+        다크 모드
+      </Button>
+    </div>
+  );
+
+  // 섹션을 순서대로 정렬
+  // const sortedSections = [...mainPageSections].sort((a, b) => a.order - b.order);
+
+  return (
+    <AdminPageLayout 
+      title="디자인 관리" 
+      description="사이트 디자인과 메인 페이지 섹션을 관리합니다."
+      actions={themeActions}
+    >
+      {alert && (
+        <div className={`mb-6 p-4 rounded-lg border ${alert.type === 'success' ? 
+          isDarkMode ? 'bg-green-900/30 border-green-500 text-green-300' : 'bg-green-50 border-green-500 text-green-700' : 
+          isDarkMode ? 'bg-red-900/30 border-red-500 text-red-300' : 'bg-red-50 border-red-500 text-red-700'
+        }`} role="alert">
+          <div className="flex items-center">
+            {alert.type === 'success' ? <CheckCircle className="h-4 w-4 mr-2" /> : <AlertTriangle className="h-4 w-4 mr-2" />}
+            <h5 className="font-medium">{alert.type === 'success' ? '성공' : '오류'}</h5>
+          </div>
+          <div className="mt-2 text-sm">{alert.message}</div>
+        </div>
+      )}
+
+      <Tabs defaultValue="sections" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="sections">메인 페이지 섹션</TabsTrigger>
+          <TabsTrigger value="components">디자인 요소 관리</TabsTrigger>
+          <TabsTrigger value="theme">테마 설정</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="sections">
+          <AdminSection 
+            title="메인 페이지 섹션 관리" 
+            description="메인 페이지에 표시될 섹션을 관리하고 순서를 변경할 수 있습니다."
+          >
+            <Card className={`mb-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : ''}`}>
+              <CardHeader>
+                <CardTitle>섹션 순서 및 노출 설정</CardTitle>
+                <CardDescription className={isDarkMode ? 'text-gray-300' : ''}>
+                  섹션의 표시 여부와 순서를 설정하세요.
+                  <br />
+                  고정된 섹션은 순서를 변경할 수 없으며, 배너를 제외한 고정 섹션은 숨길 수 없습니다.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DraggableSectionList 
+                  sections={mainPageSections} 
+                  onReorder={handleSectionReorder} 
+                  onToggleVisibility={toggleSectionVisibility} 
+                />
+                
+                <div className="flex gap-2 mt-4">
+                  <Button 
+                    onClick={saveMainPageSections} 
+                    className="bg-primary hover:bg-primary/90 text-white" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        저장 중...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        설정 저장
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    onClick={resetSections} 
+                    variant="outline" 
+                    disabled={isLoading}
+                  >
+                    초기화
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="mt-4 text-right">
+              <Button
+                onClick={() => router.push('/admin/design/section-manager')}
+                variant="outline"
+              >
+                <MoveVertical className="h-4 w-4 mr-2" />
+                상세 섹션 관리 페이지로 이동
+              </Button>
+            </div>
+          </AdminSection>
+        </TabsContent>
+        
+        <TabsContent value="components">
+          <AdminSection 
+            title="디자인 요소 관리" 
+            description="사이트의 디자인 요소를 관리합니다."
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <Card className="bg-white dark:bg-slate-900">
+                <CardHeader>
+                  <CardTitle className="text-lg">로고 관리</CardTitle>
+                  <CardDescription>웹사이트 헤더에 표시될 로고를 관리합니다.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                      <Input 
+                        id="logoFile" 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleLogoFileChange}
+                        className="cursor-pointer"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="darkLogoFile" className={isDarkMode ? 'text-gray-300' : ''}>다크모드용 로고 업로드 (선택사항)</Label>
+                      <Input 
+                        id="darkLogoFile" 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleDarkLogoFileChange}
+                        className="cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleLogoUpload}
+                    disabled={isLoading || !logoFile}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {isLoading ? '업로드 중...' : '로고 업로드'}
+                  </Button>
+                </CardFooter>
+              </Card>
+              
+              <Card className="bg-white dark:bg-slate-900">
+                <CardHeader>
+                  <CardTitle className="text-lg">배너 관리</CardTitle>
+                  <CardDescription>메인 페이지 상단에 표시될 배너를 관리합니다.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-300' : 'text-muted-foreground'}`}>
+                    배경색과 이미지(1000×200px)를 설정할 수 있는 배너를 관리할 수 있습니다.
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => router.push('/admin/design/banners')}
+                  >
+                    <Image className="h-4 w-4 mr-2" />
+                    배너 관리하기
+                  </Button>
+                </CardFooter>
+              </Card>
+              
+              <Card className="bg-white dark:bg-slate-900">
+                <CardHeader>
+                  <CardTitle className="text-lg">히어로 섹션 슬라이드</CardTitle>
+                  <CardDescription>메인 페이지 히어로 섹션에 표시될 슬라이드를 관리합니다.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-300' : 'text-muted-foreground'}`}>
+                    최대 3개의 슬라이드를 설정하여 메인 이미지, 텍스트, 버튼을 관리할 수 있습니다.
+                  </p>
+                  {heroSlides.length > 0 && (
+                    <div className="mt-2">
+                      <p className={`text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : ''}`}>현재 슬라이드: {heroSlides.length}개</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {heroSlides.map((slide) => (
+                          <div key={slide.id} className={`aspect-video relative border rounded overflow-hidden ${isDarkMode ? 'border-gray-700' : ''}`}>
+                            <img 
+                              src={slide.imageUrl} 
+                              alt={slide.title} 
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 truncate">
+                              {slide.title}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => router.push('/admin/design/hero-slides')}
+                  >
+                    <FileEdit className="h-4 w-4 mr-2" />
+                    슬라이드 관리하기
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </AdminSection>
+        </TabsContent>
+        
+        <TabsContent value="theme">
+          <AdminSection 
+            title="테마 설정" 
+            description="사이트 전체에 적용될 테마를 설정할 수 있습니다."
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-4 border rounded-md bg-white dark:bg-transparent">
+                <h3 className="text-lg font-medium mb-2">라이트 모드</h3>
+                <div className="w-full h-32 bg-white border rounded-md flex items-center justify-center">
+                  <div className="w-8 h-8 bg-blue-500 rounded-full"></div>
+                </div>
+              </div>
+              <div className="p-4 border rounded-md">
+                <h3 className="text-lg font-medium mb-2">다크 모드</h3>
+                <div className="w-full h-32 bg-gray-800 border rounded-md flex items-center justify-center">
+                  <div className="w-8 h-8 bg-blue-400 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6">
+              <Button className="w-full" onClick={handleSave}>
+                <Save className="h-4 w-4 mr-2" />
+                모든 설정 저장하기
+              </Button>
+            </div>
+          </AdminSection>
+        </TabsContent>
+      </Tabs>
+    </AdminPageLayout>
+  );
+}

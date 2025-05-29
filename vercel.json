@@ -1,0 +1,49 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "buildCommand": "CI=false NODE_OPTIONS='--max-old-space-size=4096' next build",
+  "installCommand": "npm install --legacy-peer-deps",
+  "env": {
+    "NEXT_PUBLIC_VERCEL_ENV": "production"
+  },
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin" },
+    { "source": "/admin/", "destination": "/admin/" },
+    { "source": "/admin/:match*", "destination": "/admin/:match*" },
+    { "source": "/admin/boards", "destination": "/admin/boards" },
+    { "source": "/admin/boards/:match*", "destination": "/admin/boards/:match*" },
+    { "source": "/admin/travel", "destination": "/admin/travel" },
+    { "source": "/admin/travel/:match*", "destination": "/admin/travel/:match*" },
+    { "source": "/admin/users", "destination": "/admin/users" },
+    { "source": "/admin/users/:match*", "destination": "/admin/users/:match*" },
+    { "source": "/admin/menus", "destination": "/admin/menus" },
+    { "source": "/admin/menus/:match*", "destination": "/admin/menus/:match*" },
+    { "source": "/admin/design", "destination": "/admin/design" },
+    { "source": "/admin/design/:match*", "destination": "/admin/design/:match*" },
+    { "source": "/admin/settings", "destination": "/admin/settings" },
+    { "source": "/admin/settings/:match*", "destination": "/admin/settings/:match*" },
+    { "source": "/admin/auto-posts", "destination": "/admin/auto-posts" },
+    { "source": "/admin/auto-posts/:match*", "destination": "/admin/auto-posts/:match*" },
+    { "source": "/travel/:path*", "destination": "/travel/:path*" },
+    { "source": "/(.*)", "destination": "/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "extends": ["next/core-web-vitals", "plugin:tailwindcss/recommended"],
+  "plugins": ["react-hooks"],
+  "rules": {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-unused-vars": "warn",
+    "jsx-a11y/alt-text": "warn",
+    "react/no-unescaped-entities": "off"
+  },
+  "settings": {
+    "tailwindcss": {
+      "callees": ["classnames", "clsx", "cn"]
+    }
+  }
+}

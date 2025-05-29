@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="800" height="600" fill="#f8f9fa"/>
+  
+  <!-- 몽골 지도 윤곽선 (단순화된 버전) -->
+  <path d="M150,200 C200,150 300,120 400,130 C500,140 600,180 650,250 C700,320 720,400 680,450 C640,500 550,520 450,510 C350,500 250,470 200,420 C150,370 120,300 150,200 Z" 
+        fill="#e9ecef" stroke="#14b8a6" stroke-width="3"/>
+  
+  <!-- 주요 도시 및 랜드마크 -->
+  <!-- 울란바타르 -->
+  <circle cx="400" cy="300" r="10" fill="#14b8a6"/>
+  <text x="420" y="305" font-family="Arial" font-size="16" fill="#333">울란바타르</text>
+  
+  <!-- 훕스굴 호수 -->
+  <ellipse cx="300" cy="200" rx="40" ry="30" fill="#a9d6e5" stroke="#14b8a6" stroke-width="2"/>
+  <text x="320" y="185" font-family="Arial" font-size="16" fill="#333">훕스굴 호수</text>
+  
+  <!-- 테를지 국립공원 -->
+  <rect x="450" y="350" width="60" height="40" fill="#b2f2bb" stroke="#14b8a6" stroke-width="2"/>
+  <text x="470" y="410" font-family="Arial" font-size="16" fill="#333">테를지 국립공원</text>
+  
+  <!-- 나침반 -->
+  <circle cx="700" cy="100" r="40" fill="white" stroke="#333" stroke-width="2"/>
+  <path d="M700,60 L700,140 M660,100 L740,100" stroke="#333" stroke-width="2"/>
+  <text x="695" y="85" font-family="Arial" font-size="16" fill="#333">N</text>
+  <text x="695" y="125" font-family="Arial" font-size="16" fill="#333">S</text>
+  <text x="675" y="105" font-family="Arial" font-size="16" fill="#333">W</text>
+  <text x="715" y="105" font-family="Arial" font-size="16" fill="#333">E</text>
+  
+  <!-- 제목 -->
+  <text x="400" y="50" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="#333">몽골 여행 지도</text>
+  
+  <!-- 범례 -->
+  <rect x="600" y="500" width="150" height="80" fill="white" stroke="#333" stroke-width="1"/>
+  <text x="620" y="520" font-family="Arial" font-size="14" font-weight="bold" fill="#333">범례</text>
+  <circle cx="620" cy="540" r="6" fill="#14b8a6"/>
+  <text x="635" y="545" font-family="Arial" font-size="12" fill="#333">주요 도시</text>
+  <rect x="615" y="555" width="12" height="8" fill="#b2f2bb" stroke="#14b8a6" stroke-width="1"/>
+  <text x="635" y="565" font-family="Arial" font-size="12" fill="#333">국립공원</text>
+  <ellipse cx="620" cy="575" rx="10" ry="5" fill="#a9d6e5" stroke="#14b8a6" stroke-width="1"/>
+  <text x="635" y="580" font-family="Arial" font-size="12" fill="#333">호수</text>
+</svg>
