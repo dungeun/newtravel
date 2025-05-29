@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import ClientLayout from './ClientLayout';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
@@ -25,9 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-inter min-h-screen bg-background antialiased">
         <Providers>
-          <ClientLayout>
-            {children}
-          </ClientLayout>
+          {children}
         </Providers>
       </body>
     </html>
