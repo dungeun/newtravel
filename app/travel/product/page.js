@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 // import ReviewList from './components/reviews/ReviewList';
 import ReviewForm from './components/reviews/ReviewForm';
 
-export default function ProductPage() {
+// Wrapper component to handle Suspense boundary
+function ProductPageContent() {
   const searchParams = useSearchParams();
   const productId = searchParams.get('id') || '1'; // 기본값으로 '1' 사용
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -55,41 +56,81 @@ export default function ProductPage() {
       </section>
 
       {/* 리뷰 섹션 */}
-      {/* 
-      <section>
+      <section className="mb-12">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">고객 리뷰</h2>
+          <h2 className="text-2xl font-bold">리뷰</h2>
           <button
-            onClick={() => setShowReviewForm(!showReviewForm)}
+            onClick={() => setShowReviewForm(true)}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
           >
-            {showReviewForm ? '리뷰 작성 취소' : '리뷰 작성하기'}
+            리뷰 작성하기
           </button>
         </div>
 
+        {/* 리뷰 목록 */}
+        <div className="space-y-6">
+          {/* <ReviewList productId={productId} /> */}
+          <p className="text-gray-500">리뷰가 아직 없습니다.</p>
+        </div>
+
+        {/* 리뷰 작성 폼 모달 */}
         {showReviewForm && (
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">리뷰 작성</h3>
-            <ReviewForm productId={productId} onSuccess={() => setShowReviewForm(false)} />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">리뷰 작성</h3>
+                <button
+                  onClick={() => setShowReviewForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <ReviewForm
+                productId={productId}
+                onSuccess={() => {
+                  setShowReviewForm(false);
+                  // 리뷰 목록 새로고침 로직 추가 가능
+                }}
+                onCancel={() => setShowReviewForm(false)}
+              />
+            </div>
           </div>
         )}
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <ReviewList productId={productId} />
-        </div>
       </section>
-      */}
+    </div>
+  );
+}
 
-      <section>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">고객 리뷰</h2>
-          <button
-            onClick={() => setShowReviewForm(!showReviewForm)}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-          >
-            {showReviewForm ? '리뷰 작성 취소' : '리뷰 작성하기'}
-          </button>
+export default function ProductPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
+          <div className="h-64 bg-gray-200 rounded-lg mb-6"></div>
+          <div className="h-12 bg-gray-200 rounded w-1/3 mb-6"></div>
         </div>
+      </div>
+    }>
+      <ProductPageContent />
+    </Suspense>
+  );
+}
 
         {showReviewForm && (
           <div className="mb-8">
