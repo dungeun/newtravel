@@ -599,3 +599,6 @@ function RecommendedProducts({
     </div>
   );
 } 
+// 동적 페이지로 설정 (정적 생성 방지)
+export const dynamic = 'force-dynamic';
+export const revalidate = false;
