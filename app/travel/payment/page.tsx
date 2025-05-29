@@ -36,7 +36,6 @@ export default function PaymentPage() {
                 <label htmlFor={method} className="ml-2 block text-sm text-gray-700">
                   {method === 'kakao' ? '카카오페이' : 
                    method === 'card' ? '신용/체크카드' : '무통장 입금'}
-                  }
                 </label>
               </div>
             ))}
@@ -57,6 +56,6 @@ export default function PaymentPage() {
   );
 }
 
-// Next.js 13+ App Router에서의 라우트 설정
+// Payment pages should not be cached
 export const dynamic = 'force-dynamic';
-export const revalidate = 0; // 캐시 없음
+export const revalidate = 0; // No caching for payment pages

@@ -8,8 +8,8 @@ import { AlertCircle, ArrowLeft, RefreshCw, Home } from 'lucide-react';
 import { clearAllCheckoutData } from '@/lib/checkout/checkoutSync';
 
 // 라우팅 설정
-export const dynamic = 'force-static';
-export const revalidate = 60; // 60초마다 재검증
+export const dynamic = 'force-dynamic'; // Force dynamic rendering for payment pages
+export const revalidate = 0; // No caching for payment pages
 
 interface PaymentError {
   code: string;

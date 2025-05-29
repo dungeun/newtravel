@@ -102,6 +102,7 @@ export default function ProductPage() {
   );
 }
 
-// 동적 라우팅 설정
+// This is a dynamic route that should not be statically generated
 export const dynamic = 'force-dynamic';
-export const revalidate = 0; // 캐시 없음
+// Disable any caching for this page
+export const fetchCache = 'force-no-store';

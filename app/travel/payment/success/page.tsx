@@ -245,5 +245,6 @@ export default function PaymentSuccessPage() {
   );
 }
 
-// 정적 페이지 재검증 설정
-export const revalidate = 60; // 60초마다 재검증
+// Payment success pages should not be cached
+export const dynamic = 'force-dynamic';
+export const revalidate = 0; // No caching for payment success pages

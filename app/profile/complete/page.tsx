@@ -1,5 +1,10 @@
 'use client';
 
+// Disable static generation for dynamic routes
+export const dynamic = 'force-dynamic';
+// Disable revalidation for dynamic routes
+export const revalidate = 0;
+
 import { useState, useEffect, useRef } from 'react';
 import Script from 'next/script';
 import { useRouter } from 'next/navigation';

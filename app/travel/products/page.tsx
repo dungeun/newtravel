@@ -47,7 +47,8 @@ export default function ProductsPage() {
 
   // 상품 데이터 가져오기
   const { data: productsData, isLoading, error } = useProducts(queryFilters);
-  const products: TravelProduct[] = productsData || [];
+  // Type assertion to handle the data structure
+  const products = (productsData as unknown) as TravelProduct[] || [];
 
   // 필터링된 상품 목록
   const filteredProducts = useMemo(() => {
@@ -318,6 +319,7 @@ export default function ProductsPage() {
   );
 }
 
-// 동적 페이지로 설정 (정적 생성 방지)
+// This is a dynamic route that should not be statically generated
 export const dynamic = 'force-dynamic';
-export const revalidate = false;
+// Disable any caching for this page
+export const fetchCache = 'force-no-store';

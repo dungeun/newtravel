@@ -1,0 +1,220 @@
+The Netlify deploy errored. The relevant error log line information is:
+Line 181: [2K[1G[2m$ NEXT_PUBLIC_SKIP_BUILD_ERROR=true next build[22m
+Line 189: Attempted import error: 'routeConfig' is not exported from '../route-config' (imported as 'routeConfig').
+Line 193: Attempted import error: 'routeConfig' is not exported from '../route-config' (imported as 'routeConfig').
+Line 197: Attempted import error: 'routeConfig' is not exported from '../route-config' (imported as 'routeConfig').
+Line 201: Attempted import error: 'routeConfig' is not exported from '../route-config' (imported as 'routeConfig').
+Line 205: Attempted import error: 'routeConfig' is not exported from '../route-config' (imported as 'routeConfig').
+Line 209: Attempted import error: 'routeConfig' is not exported from '../route-config' (imported as 'routeConfig').
+Line 252: 사용자 인증 미들웨어 오류: B [Error]: Dynamic server usage: Route /api/mypage/orders/ couldn't be rendered statically because it used `requ
+Line 275: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 288: Error occurred prerendering page "/_not-found". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 289: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 300: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 313: Error occurred prerendering page "/admin/analytics". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 314: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 325: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 338: Error occurred prerendering page "/admin/design/banners". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 339: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 350: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 363: Error occurred prerendering page "/admin/boards/settings". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 364: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 376: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 389: Error occurred prerendering page "/admin/settings". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 390: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 407: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 420: Error occurred prerendering page "/admin/auto-posts". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 421: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 432: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 445: Error occurred prerendering page "/admin/notifications". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 446: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 457: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 470: Error occurred prerendering page "/admin/smtp-mail". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 471: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 482: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 495: Error occurred prerendering page "/admin/boards". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 496: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 507: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 520: Error occurred prerendering page "/admin/travel/day". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 521: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 532: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 545: Error occurred prerendering page "/auth/error". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 546: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 557: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 570: Error occurred prerendering page "/admin/styleguide". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 571: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 582: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 595: Error occurred prerendering page "/admin/coupons". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 596: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 607: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 620: Error occurred prerendering page "/admin". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 621: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 638: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 651: Error occurred prerendering page "/admin/design/section-manager". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 652: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 669: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 682: Error occurred prerendering page "/admin/orders". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 683: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 694: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 707: Error occurred prerendering page "/admin/travel/products". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 708: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 719: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 732: Error occurred prerendering page "/admin/travel". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 733: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 744: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 757: Error occurred prerendering page "/admin/design/image". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 758: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 777: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 790: Error occurred prerendering page "/admin/design/images". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 791: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 802: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 815: Error occurred prerendering page "/admin/travel/products/create". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 816: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 827: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 840: Error occurred prerendering page "/admin/boards/list". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 841: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 852: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 865: Error occurred prerendering page "/admin/travel/categories". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 866: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 877: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 890: Error occurred prerendering page "/admin/reviews". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 891: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 909: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 922: Error occurred prerendering page "/admin/sales". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 923: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 934: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 947: Error occurred prerendering page "/admin/design/hero-slides". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 948: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 959: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 972: Error occurred prerendering page "/admin/settings/basic". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 973: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 984: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 997: Error occurred prerendering page "/terms". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 998: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1009: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1022: Error occurred prerendering page "/checkout/complete". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1023: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1040: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1053: Error occurred prerendering page "/admin/settings/system". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1054: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1077: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1090: Error occurred prerendering page "/admin/settings/api". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1091: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1102: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1115: Error occurred prerendering page "/app/travel". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1116: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1139: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1152: Error occurred prerendering page "/login". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1153: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1164: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1177: Error occurred prerendering page "/admin/settings/admin". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1178: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1195: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1208: Error occurred prerendering page "/travel/categories". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1209: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1220: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1233: Error occurred prerendering page "/admin/push-ads". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1234: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1245: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1258: Error occurred prerendering page "/profile". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1259: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1288: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1301: Error occurred prerendering page "/mypage". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1302: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1313: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1326: Error occurred prerendering page "/admin/design". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1327: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1344: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1357: Error occurred prerendering page "/mypage/profile". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1358: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1369: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1382: Error occurred prerendering page "/template1". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1383: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1394: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1407: Error occurred prerendering page "/admin/users". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1408: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1419: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1432: Error occurred prerendering page "/profile/complete". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1433: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1444: Error: Invalid revalidate value "[object Object]" on "/travel/payment/fail/", must be a non-negative number or "false"
+Line 1457: Error: Invalid revalidate value "[object Object]" on "/travel/payment/fail/", must be a non-negative number or "false"
+Line 1470: Error occurred prerendering page "/travel/payment/fail". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1471: Error: Invalid revalidate value "[object Object]" on "/travel/payment/fail/", must be a non-negative number or "false"
+Line 1482: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1495: Error occurred prerendering page "/admin/travel/create". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1496: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1507: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1520: Error occurred prerendering page "/travel". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1521: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1532: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1545: Error occurred prerendering page "/". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1546: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1575: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1588: Error occurred prerendering page "/travel/mypage". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1589: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1600: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1613: Error occurred prerendering page "/styleguide". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1614: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1625: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1638: Error occurred prerendering page "/admin/menus". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1639: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1656: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1669: Error occurred prerendering page "/travel/checkout". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1670: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1687: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1700: Error occurred prerendering page "/auth/signin". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1701: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1713: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1726: Error occurred prerendering page "/travel/free_travel/create". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1727: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1738: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1751: Error occurred prerendering page "/checkout". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1752: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1763: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1776: Error occurred prerendering page "/travel/cart". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1777: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1788: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1801: Error occurred prerendering page "/travel/order-complete". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1802: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1813: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1826: Error occurred prerendering page "/travel/free_travel". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1827: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1838: Error: Invalid revalidate value "[object Object]" on "/travel/payment/", must be a non-negative number or "false"
+Line 1851: Error: Invalid revalidate value "[object Object]" on "/travel/payment/", must be a non-negative number or "false"
+Line 1864: Error occurred prerendering page "/travel/payment". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1865: Error: Invalid revalidate value "[object Object]" on "/travel/payment/", must be a non-negative number or "false"
+Line 1876: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1889: Error occurred prerendering page "/auth/signup". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1890: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1901: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1914: Error occurred prerendering page "/auth/reset-password". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1915: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1932: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1945: Error occurred prerendering page "/admin/users/members". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1946: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1975: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 1988: Error occurred prerendering page "/travel/products". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 1989: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 2000: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 2013: Error occurred prerendering page "/admin/users/admins". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 2014: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 2025: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 2038: Error occurred prerendering page "/travel/payment/success". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 2039: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 2050: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 2063: Error occurred prerendering page "/travel/payment/process". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 2064: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but g
+Line 2075: Error: Invalid revalidate value "[object Object]" on "/travel/product/", must be a non-negative number or "false"
+Line 2088: Error: Invalid revalidate value "[object Object]" on "/travel/product/", must be a non-negative number or "false"
+Line 2101: Error occurred prerendering page "/travel/product". Read more: https://nextjs.org/docs/messages/prerender-error
+Line 2102: Error: Invalid revalidate value "[object Object]" on "/travel/product/", must be a non-negative number or "false"
+Line 2114: > Export encountered errors on following paths:
+Line 2152: 	/auth/error/page: /auth/error
+Line 2181: [2K[1G[31merror[39m Command failed with exit code 1.
+Line 2187:   [31m[1mError message[22m[39m
+Line 2190:   [31m[1mError location[22m[39m
+Line 2214: Build failed due to a user error: Build script returned non-zero exit code: 2
+Netlify has analyzed the error and provided the following guidance:
+The build failure is due to import errors in the `page.tsx` file. Specifically, the error states that `'routeConfig' is not exported from '../route-config'`.
+These errors are causing the build to fail due to attempted imports that are not exported correctly.
+By resolving the export issue in the `route-config` file, the build should proceed without import errors.

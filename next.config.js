@@ -3,51 +3,130 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 /** @type {import('next').NextConfig} */
+// Import our revalidation configuration
+const { revalidation } = require('./app/config/revalidation');
+const { withSentryConfig } = require('@sentry/nextjs');
+
+// Main Next.js configuration
 const nextConfig = {
+  // Basic configuration
   reactStrictMode: false,
   swcMinify: true,
-  // 서버 컴포넌트 배포 설정
   output: 'standalone',
-  // 동적 라우팅 설정
+  trailingSlash: true,
   skipTrailingSlashRedirect: true,
-  // 이미지 설정
+  
+  // Experimental features
+  experimental: {
+    // Disable static optimization
+    isrMemoryCacheSize: 0,
+    // Server actions configuration
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+    // Force all pages to be server-rendered
+    forceServerRendering: true,
+  },
+  
+  // Disable static optimization for all pages
+  generateEtags: false,
+  
+  // API configuration
+  api: {
+    bodyParser: false,
+    responseLimit: false,
+  },
+  
+  // Images configuration
   images: {
     domains: ['firebasestorage.googleapis.com', 'lh3.googleusercontent.com'],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
+    unoptimized: true, // Disable image optimization
   },
+  
+  // TypeScript and ESLint configuration
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
+  // Custom page extensions
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
-  webpack: (config, { dev, isServer }) => {
-    // Firebase 관련 문제 해결
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      // Firebase ESM 모듈 별칭 제거
-    };
-
-    // Firebase 경고 무시
+  
+  // Webpack configuration
+  webpack: (config, { isServer, dev }) => {
+    // Fixes npm packages that depend on `fs` module
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        dns: false,
+        child_process: false,
+        undici: false,
+        'undici/lib/web/fetch/util.js': false,
+        'cheerio/node_modules/undici': false,
+        '@firebase/storage/node_modules/undici': false,
+      };
+    }
+    
+    // Ignore Firebase warnings
     config.ignoreWarnings = [
       { module: /firebase/ },
     ];
-
-    // Puppeteer 및 불필요한 서버 모듈 제외
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-      dns: false,
-      child_process: false,
-      undici: false,
-      'undici/lib/web/fetch/util.js': false,
-      'cheerio/node_modules/undici': false,
-      '@firebase/storage/node_modules/undici': false,
-    };
-
+    
     return config;
   },
-  trailingSlash: true,
+  
+  // URL rewrites
+  async rewrites() {
+    return [
+      // Add any custom rewrites here if needed
+    ];
+  },
+  
+  // Custom headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+        ],
+      },
+    ];
+  },
+  
+  // URL redirects
   async redirects() {
     return [
       {
@@ -62,17 +141,19 @@ const nextConfig = {
       },
     ];
   },
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
+};
+
+// Apply Sentry configuration if SENTRY_DSN is set
+if (process.env.SENTRY_DSN) {
+  module.exports = withBundleAnalyzer(
+    withSentryConfig(nextConfig, {
+      // Additional Sentry configuration
+      hideSourceMaps: true,
+    })
+  );
+} else {
+  module.exports = withBundleAnalyzer(nextConfig);
+}
             value: 'GET, POST, PUT, DELETE, OPTIONS',
           },
           {

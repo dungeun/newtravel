@@ -1,10 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-
 export default function MyPage() {
-  const router = useRouter();
-  
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">마이페이지</h1>
@@ -13,5 +9,7 @@ export default function MyPage() {
   );
 }
 
-// 정적 페이지 재검증 설정
-export const revalidate = 60; // 60초마다 재검증
+// Disable static generation for dynamic routes
+export const dynamic = 'force-dynamic';
+// Disable revalidation for dynamic routes
+export const revalidate = 0;
