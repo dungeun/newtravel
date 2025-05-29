@@ -4,21 +4,27 @@ export const routeConfig = {
   revalidate: 60, // 1 minute
   
   // Common paths
-  paths: {
-    home: '/',
-    travel: '/travel',
+  routes: {
+    home: '/travel',
     products: '/travel/products',
+    product: '/travel/product',
+    cart: '/travel/cart',
     checkout: '/travel/checkout',
-    payment: '/travel/payment',
+    orders: '/travel/orders',
     mypage: '/travel/mypage',
-    admin: '/admin'
+    login: '/travel/login',
+    register: '/travel/register',
+    search: '/travel/search',
   },
   
   // API endpoints
   api: {
     products: '/api/products',
+    product: '/api/product',
+    cart: '/api/cart',
+    checkout: '/api/checkout',
     orders: '/api/orders',
-    payment: '/api/payment'
+    auth: '/api/auth',
   }
 };
 

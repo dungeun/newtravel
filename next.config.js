@@ -3,9 +3,28 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 /** @type {import('next').NextConfig} */
-// Import our revalidation configuration
-const { revalidation } = require('./app/config/revalidation');
-const { withSentryConfig } = require('@sentry/nextjs');
+// Revalidation configuration
+const revalidation = {
+  default: 60, // 1 minute
+  routes: {
+    product: 300, // 5 minutes
+    products: 180, // 3 minutes
+    checkout: 0,
+    mypage: 0,
+    profile: 0,
+    auth: 0,
+    admin: 0,
+  },
+};
+// Optional Sentry configuration
+let withSentryConfig = (config) => config;
+
+try {
+  // Try to load Sentry if available
+  withSentryConfig = require('@sentry/nextjs').withSentryConfig;
+} catch (e) {
+  console.log('Sentry is not installed, skipping Sentry configuration');
+}
 
 // Main Next.js configuration
 const nextConfig = {
@@ -18,24 +37,14 @@ const nextConfig = {
   
   // Experimental features
   experimental: {
-    // Disable static optimization
-    isrMemoryCacheSize: 0,
     // Server actions configuration
     serverActions: {
       bodySizeLimit: '2mb',
     },
-    // Force all pages to be server-rendered
-    forceServerRendering: true,
   },
   
   // Disable static optimization for all pages
   generateEtags: false,
-  
-  // API configuration
-  api: {
-    bodyParser: false,
-    responseLimit: false,
-  },
   
   // Images configuration
   images: {
@@ -154,62 +163,6 @@ if (process.env.SENTRY_DSN) {
 } else {
   module.exports = withBundleAnalyzer(nextConfig);
 }
-            value: 'GET, POST, PUT, DELETE, OPTIONS',
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization',
-          },
-        ],
-      },
-    ];
-  },
-  typescript: {
-    // !! 중요: 타입스크립트 에러가 있어도 빌드를 허용
-    ignoreBuildErrors: true,
-  },
-  // 빌드 오류 무시
-  eslint: {
-    // ESLint 오류 무시
-    ignoreDuringBuilds: true,
-  },
-  // 정적 내보내기 설정
-  experimental: {
-    // 빌드 실패 시 계속 진행
-    skipTrailingSlashRedirect: true,
-    skipMiddlewareUrlNormalize: true,
-    // 컴파일 오류 무시
-    esmExternals: 'loose',
-  },
-  eslint: {
-    // ESLint 오류 무시
-    ignoreDuringBuilds: true,
-  },
-  // 빌드 시 발생하는 모든 오류 무시
-  onDemandEntries: {
-    // 페이지 버퍼 크기
-    maxInactiveAge: 25 * 1000,
-    // 동시에 유지할 페이지 수
-    pagesBufferLength: 2,
-  },
-  // Next.js 서버 사이드 렌더링 사용
-  experimental: {
-    forceSwcTransforms: true,
-    serverComponentsExternalPackages: ['firebase', 'firebase-admin'],
-    // 동적 페이지 처리 개선
-    serverActions: {
-      bodySizeLimit: '2mb',
-    },
-  },
-  // 빌드 오류 무시 설정
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    // ESLint 에러가 있어도 빌드를 허용
-    ignoreDuringBuilds: true,
-  },
-};
 
 // 빌드에서 제외할 경로
 const excludedPaths = [
