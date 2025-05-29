@@ -7,10 +7,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, ArrowLeft, RefreshCw, Home } from 'lucide-react';
 import { clearAllCheckoutData } from '@/lib/checkout/checkoutSync';
 
-// 라우팅 설정 적용
+// 라우팅 설정
 export const dynamic = 'force-static';
 export const revalidate = 60; // 60초마다 재검증
-export const unstable_skipValidation = true; // 빌드 시 라우트 유효성 검사 건너뛰기
 
 interface PaymentError {
   code: string;
