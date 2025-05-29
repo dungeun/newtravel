@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from './hooks/useAuth';
 import { db } from './firebase/config';
 import { collection, query, getDocs, limit } from 'firebase/firestore';
-import MainPageLayout from './components/main/MainPageLayout';
+import MainPageLayout from '@/components/main/MainPageLayout';
 
 // 여행 상품 타입 정의
 interface TravelProduct {

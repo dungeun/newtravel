@@ -151,7 +151,7 @@ nextConfig.webpack = (config, { isServer }) => {
   return config;
 };
 
-// 페이지 확장자 설정 (page.tsx, page.jsx, page.js, page.ts만 빌드에 포함)
-nextConfig.pageExtensions = ['page.tsx', 'page.jsx', 'page.js', 'page.ts'];
+// 페이지 확장자 설정 (app 디렉토리 내의 page.tsx를 인식하도록 수정)
+nextConfig.pageExtensions = ['tsx', 'jsx', 'js', 'ts'];
 
 module.exports = withBundleAnalyzer(nextConfig);
